@@ -117,20 +117,9 @@ configs:
 # -- Array of extra K8s manifests to deploy
 ## Note: Supports use of custom Helm templates
 extraObjects:
-  - apiVersion: v1
-    kind: Secret
-    metadata:
-      name: argocd-redis
-    data:
-      REDIS_PASSWORD: UTF3MmUzcjQkCg==
-      auth: UTF3MmUzcjQkCg==
-#   - apiVersion: monitoring.coreos.com/v1
-#     kind: PrometheusRule
-#     metadata:
-#       name: argo-cd-rules
-#     spec:
-#       # p#rettier-ignore
-#       # {#{ exec "yq" (list "." "./prometheus.rules.yaml") | nindent 6 }}
+# values.yaml da instalação do Argo CD
+  # prettier-ignore
+  # {{ readFile "./extra-objects.yaml" | fromYaml | toYaml | nindent 2 }}
 
 ## Application controller
 controller:
