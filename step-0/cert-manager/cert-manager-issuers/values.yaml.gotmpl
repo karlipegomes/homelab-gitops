@@ -1,0 +1,28 @@
+_1: &email contact@staffops.cloud
+_2: &solvers
+  - dns01:
+      cloudDNS:
+        project: staffops-prd
+        serviceAccountSecretRef:
+          name: cert-manager-cred
+          key: credentials.json
+  - http01:
+      ingress:
+        ingressClassName: nginx-external
+clusterIssuers:
+  - name: letsencrypt-prod
+    spec:
+      acme:
+        email: *email
+        server: https://acme-v02.api.letsencrypt.org/directory
+        privateKeySecretRef:
+          name: letsencrypt-prod
+        solvers: *solvers
+  - name: letsencrypt-staging
+    spec:
+      acme:
+        email: *email
+        server: https://acme-staging-v02.api.letsencrypt.org/directory
+        privateKeySecretRef:
+          name: letsencrypt-staging
+        solvers: *solvers

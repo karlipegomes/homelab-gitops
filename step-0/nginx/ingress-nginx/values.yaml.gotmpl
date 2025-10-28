@@ -1,0 +1,30 @@
+controller:
+  ingressClassByName: true
+  #! Disable allowSnippetAnnotations due to security issues https://github.com/kubernetes/kubernetes/issues/126811
+  allowSnippetAnnotations: true
+  ingressClassResource:
+    enabled: true
+    name: nginx-external
+    controllerValue: k8s.io/ingress-nginx-external
+  resources:
+    requests:
+      cpu: 150m
+      memory: 192Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+  service:
+    enabled: true
+    external:
+      enabled: true
+  metrics:
+    enabled: false
+    service:
+      enabled: true
+    serviceMonitor:
+      enabled: false
+    prometheusRule:
+      enabled: false
+      rules:
+        # prettier-ignore
+        # {{ exec "yq" (list ".groups[0].rules" "../prometheus.rules.yaml") | nindent 10 }}

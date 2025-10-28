@@ -1,0 +1,341 @@
+# -- Create cluster roles for cluster-wide installation.
+## Used when you manage applications in the same cluster where Argo CD runs
+createClusterRoles: true
+crds:
+  # -- Install and upgrade CRDs
+  install: true
+  # -- Keep CRDs on chart uninstall
+  keep: true
+
+global:
+  domain: argocd.staffops.cloud
+  logging:
+    format: json
+    level: info
+
+## Argo Configs
+configs:
+  # General Argo CD configuration. Any values you put under `.configs.cm` are passed to argocd-cm ConfigMap.
+  ## Ref: https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/argocd-cm.yaml
+  # cm:
+  #   server.rbac.log.enforce.enable: 'true'
+  #   admin.enabled: true
+  #   timeout.reconciliation: 30s
+  #   resource.exclusions: |
+  #     - apiGroups:
+  #         - "*"
+  #       kinds:
+  #         - Backup
+  #       clusters:
+  #         - "*"
+  #   oidc.config: |
+  #     name: Keycloak
+  #     issuer: https://keycloak.staffops.cloud/realms/StaffOps
+  #     clientID: argo-cd
+  #     clientSecret: $SSO_CLIENT_SECRET
+  #     enableUserInfoGroups: true
+  #     userInfoPath: /protocol/openid-connect/userinfo
+  #     userInfoCacheExpiration: "1m"
+  #     getUserInfo: true
+  #     requestIDTokenClaims:
+  #       groups:
+  #         essential: true
+  #       roles:
+  #         essential: true
+  #     requestedScopes:
+  #       - email
+  #       - groups
+  #       - openid
+  #       - profile
+  #       - roles
+  #   params:
+  #     create: true
+  #     reposerver.parallelism.limit: 10
+  #     controller.status.processors: 20
+  #     controller.operation.processors: 10
+
+  # Argo CD RBAC policy configuration
+  ## Ref: https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/rbac.md
+  # rbac:
+  #   create: true
+  #   scopes: '[groups]'
+  #   policy.default: ''
+  #   policy.csv: |
+  #     g, /argo-cd-admin, role:admin
+  #     g, /argo-cd-viewer, role:readonly
+      
+  # ConfigMap for Config Management Plugins
+  # Ref: https://argo-cd.readthedocs.io/en/stable/operator-manual/config-management-plugins/
+  cmp:
+    create: true
+    plugins:
+      # https://github.com/travisghansen/argo-cd-helmfile/tree/master
+      helmfile:
+        init:
+          command: ['argo-cd-helmfile.sh']
+          args: ['init']
+        generate:
+          command: ['argo-cd-helmfile.sh']
+          args: ['generate']
+        discover:
+          find:
+            command: [argo-cd-helmfile.sh, discover]
+        parameters:
+          dynamic:
+            command: [argo-cd-helmfile.sh, parameters]
+        preserveFileMode: true
+
+  # -- Repositories list to be used by applications
+  ## Creates a secret for each key/value specified below to create repositories
+  ## Note: the last example in the list would use a repository credential template, configured under "configs.credentialTemplates".
+  repositories:
+    staffops-labs-repo:
+      url: https://storage.googleapis.com/istio-prerelease/daily-build/master-latest-daily/charts
+      name: staffops-labs
+
+  # Argo CD sensitive data
+  # Ref: https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/#sensitive-data-and-sso-client-secrets
+  secret:
+    createSecret: true
+    extra:
+      {}
+      # LDAP_PASSWORD: "mypassword"
+
+    # -- Bcrypt hashed admin password
+    ## Argo expects the password in the secret to be bcrypt hashed. You can create this hash with
+    ## `htpasswd -nbBC 10 "" $ARGO_PWD | tr -d ':\n' | sed 's/$2y/$2a/'`
+    argocdServerAdminPassword: ""
+    # -- Admin password modification time. Eg. `"2006-01-02T15:04:05Z"`
+    # @default -- `""` (defaults to current time)
+    argocdServerAdminPasswordMtime: ""
+
+  params:
+    server.insecure: true
+  certificate:
+    enable: true
+
+# -- Array of extra K8s manifests to deploy
+## Note: Supports use of custom Helm templates
+extraObjects:
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: argocd-redis
+    data:
+      REDIS_PASSWORD: UTF3MmUzcjQkCg==
+      auth: UTF3MmUzcjQkCg==
+#   - apiVersion: monitoring.coreos.com/v1
+#     kind: PrometheusRule
+#     metadata:
+#       name: argo-cd-rules
+#     spec:
+#       # p#rettier-ignore
+#       # {#{ exec "yq" (list "." "./prometheus.rules.yaml") | nindent 6 }}
+
+## Application controller
+controller:
+  replicas:
+  pdb:
+    enabled: false
+  # -- Resource limits and requests for the application controller pods
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  # -- Application controller container-level security context
+  # @default -- See [values.yaml]
+  containerSecurityContext:
+    runAsNonRoot: true
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+      - ALL
+  # Readiness probe for application controller
+  readinessProbe:
+    failureThreshold: 3
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 1
+  ## Application controller metrics configuration
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
+## Redis
+redis:
+  enabled: true
+  metrics:
+    enabled: true
+  serviceMonitor:
+    enabled: true
+  podMonitor:
+    enabled: true
+  prometheusRule: true
+  resources:
+    requests:
+      cpu: 20m
+      memory: 32Mi
+    limits:
+      cpu: 20m
+      memory: 32Mi
+
+## Server
+server:
+  replicas: 1
+  pdb:
+    enabled: false
+
+  ## Argo CD extensions
+  ## This function in tech preview stage, do expect instability or breaking changes in newer versions.
+  ## Ref: https://github.com/argoproj-labs/argocd-extension-installer
+  ## When you enable extensions, you need to configure RBAC of logged in Argo CD user.
+  ## Ref: https://argo-cd.readthedocs.io/en/stable/operator-manual/rbac/#the-extensions-resource
+  extensions:
+    # -- Enable support for Argo CD extensions
+    enabled: false
+    # -- Extensions for Argo CD
+    # @default -- `[]` (See [values.yaml])
+    ## Ref: https://github.com/argoproj-labs/argocd-extension-metrics#install-ui-extension
+    extensionList: []
+    #  - name: extension-metrics
+    #    env:
+    #      - name: EXTENSION_URL
+    #        value: https://github.com/argoproj-labs/argocd-extension-metrics/releases/download/v1.0.0/extension.tar.gz
+    #      - name: EXTENSION_CHECKSUM_URL
+    #        value: https://github.com/argoproj-labs/argocd-extension-metrics/releases/download/v1.0.0/extension_checksums.txt
+
+  # -- Server container-level security context
+  # @default -- See [values.yaml]
+  containerSecurityContext:
+    runAsNonRoot: true
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+      - ALL
+
+  ## Readiness and liveness probes for default backend
+  ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+  readinessProbe:
+    failureThreshold: 3
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 1
+  livenessProbe:
+    failureThreshold: 3
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 1
+
+  ## Server metrics service configuration
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
+  # Argo CD server ingress configuration
+  ingress:
+    enabled: true
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      # nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+      # nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    ingressClassName: "nginx-external"
+    tls: true
+
+## Repo Server
+repoServer:
+  initContainers:
+    - name: download-tools
+      image: alpine:3.8
+      command: [sh, -c]
+      resources:
+        requests:
+          cpu: 2000m
+          memory: 2048Mi
+        limits:
+          cpu: 2000m
+          memory: 2048Mi
+      args:
+        - wget -qO /custom-tools/argo-cd-helmfile.sh https://raw.githubusercontent.com/travisghansen/argo-cd-helmfile/master/src/argo-cd-helmfile.sh &&
+          chmod +x /custom-tools/argo-cd-helmfile.sh &&
+          wget -qO /custom-tools/helmfile https://github.com/roboll/helmfile/releases/download/v0.138.7/helmfile_linux_amd64 &&
+          chmod +x /custom-tools/helmfile
+      volumeMounts:
+        - mountPath: /custom-tools
+          name: custom-tools
+  volumeMounts:
+    - mountPath: /usr/local/bin/argo-cd-helmfile.sh
+      name: custom-tools
+      subPath: argo-cd-helmfile.sh
+    - mountPath: /usr/local/bin/helmfile
+      name: custom-tools
+      subPath: helmfile
+  extraContainers:
+    - name: helmfile-plugin
+      image: travisghansen/argo-cd-helmfile:v0.3.13
+      command: [/var/run/argocd/argocd-cmp-server]
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+      volumeMounts:
+        - mountPath: /var/run/argocd
+          name: var-files
+        - mountPath: /home/argocd/cmp-server/plugins
+          name: plugins
+        - mountPath: /tmp
+          name: helmfile-cmp-tmp
+  volumes:
+    - name: helmfile-cmp-tmp
+      emptyDir: {}
+    - name: custom-tools
+      emptyDir: {}
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 200m
+      memory: 512Mi
+
+## ApplicationSet controller
+applicationSet:
+  enabled: true
+  replicas: 1
+  pdb:
+    enabled: false
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 100m
+      memory: 256Mi
+
+## Disabled
+dex:
+  enabled: false
+notifications:
+  enabled: false
+redisSecretInit:
+  enabled: false

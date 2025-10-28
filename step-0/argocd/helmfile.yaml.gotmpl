@@ -1,0 +1,26 @@
+repositories:
+  - name: argo
+    url: https://argoproj.github.io/argo-helm
+templates:
+  default-release: &default-release
+    namespace: argo
+environments:
+  default:
+    values:
+      - kubeContext: minikube
+        releases:
+          argocd:
+            version: '9.0.5'
+            <<: *default-release
+---
+templates:
+  default: &default
+    kubeContext: '{{ .Values.kubeContext}}'
+    version: '{{`{{ .Values | get "releases" | get .Release.Name | get "version" }}`}}'
+    namespace: '{{`{{ .Values | get "releases" | get .Release.Name | get "namespace" }}`}}'
+    values:
+      - ./{{`{{ .Release.Name }}`}}/values.yaml.gotmpl
+releases:
+  - chart: argo/argo-cd
+    name: argocd
+    <<: *default

@@ -1,0 +1,31 @@
+deploymentStrategy:
+  type: RollingUpdate
+serviceMonitor:
+  enabled: false
+logFormat: json
+logLevel: debug
+sources:
+  - service
+  - ingress
+policy: sync
+registry: txt
+txtOwnerId: minikube
+txtPrefix: int-external-dns.
+domainFilters:
+  - staffops.cloud
+provider:
+  name: google
+extraArgs:
+  - --google-project=staffops-prd
+env:
+  - name: GOOGLE_APPLICATION_CREDENTIALS
+    value: "/etc/secrets/credentials.json"
+extraVolumes:
+  - name: creds
+    secret:
+      secretName: external-dns-cred
+
+extraVolumeMounts:
+  - name: creds
+    mountPath: /etc/secrets
+    readOnly: true
