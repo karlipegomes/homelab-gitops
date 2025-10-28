@@ -88,10 +88,15 @@ configs:
   # -- Repositories list to be used by applications
   ## Creates a secret for each key/value specified below to create repositories
   ## Note: the last example in the list would use a repository credential template, configured under "configs.credentialTemplates".
+  # repositories: {}
   repositories:
     staffops-labs-repo:
       url: https://github.com/karlipegomes/homelab-gitops.git
       name: staffops-labs
+      project: platform
+      type: git
+      # username: ref+gcpsecrets://staffops-prd/homelab-github-user
+      # password: ref+gcpsecrets://staffops-prd/homelab-github-pass
 
   # Argo CD sensitive data
   # Ref: https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/#sensitive-data-and-sso-client-secrets
@@ -113,6 +118,12 @@ configs:
     server.insecure: true
   certificate:
     enable: true
+
+# credentialTemplates:
+#   https-creds:
+#     url: https://github.com/karlipegomes
+#     username: ref+gcpsecrets://staffops-prd/homelab-github-user
+#     password: ref+gcpsecrets://staffops-prd/homelab-github-pass
 
 # -- Array of extra K8s manifests to deploy
 ## Note: Supports use of custom Helm templates
@@ -169,12 +180,37 @@ redis:
     enabled: true
   prometheusRule: true
   resources:
-    requests:
-      cpu: 20m
-      memory: 32Mi
     limits:
-      cpu: 20m
-      memory: 32Mi
+      cpu: 200m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 64Mi
+  # securityContext:
+  #   runAsNonRoot: true
+  #   runAsUser: 999
+  #   seccompProfile:
+  #     type: RuntimeDefault
+  # containerSecurityContext:
+  #   readOnlyRootFilesystem: true
+  #   allowPrivilegeEscalation: false
+  #   capabilities:
+  #     drop:
+  #     - ALL
+  # readinessProbe:
+  #   enabled: true
+  #   initialDelaySeconds: 30
+  #   periodSeconds: 15
+  #   timeoutSeconds: 15
+  #   successThreshold: 1
+  #   failureThreshold: 5
+  # livenessProbe:
+  #   enabled: true
+  #   initialDelaySeconds: 30
+  #   periodSeconds: 15
+  #   timeoutSeconds: 15
+  #   successThreshold: 1
+  #   failureThreshold: 5
 
 ## Server
 server:
@@ -252,16 +288,13 @@ repoServer:
       command: [sh, -c]
       resources:
         requests:
-          cpu: 2000m
-          memory: 2048Mi
+          cpu: 200m
+          memory: 512Mi
         limits:
-          cpu: 2000m
-          memory: 2048Mi
+          cpu: 200m
+          memory: 512Mi
       args:
-        - wget -qO /custom-tools/argo-cd-helmfile.sh https://raw.githubusercontent.com/travisghansen/argo-cd-helmfile/master/src/argo-cd-helmfile.sh &&
-          chmod +x /custom-tools/argo-cd-helmfile.sh &&
-          wget -qO /custom-tools/helmfile https://github.com/roboll/helmfile/releases/download/v0.138.7/helmfile_linux_amd64 &&
-          chmod +x /custom-tools/helmfile
+        - apk add git && git clone https://github.com/travisghansen/argo-cd-helmfile.git /tmp/teste && cp /tmp/teste/src/argo-cd-helmfile.sh /custom-tools/argo-cd-helmfile.sh && chmod +x /custom-tools/argo-cd-helmfile.sh && wget -qO /custom-tools/helmfile https://github.com/roboll/helmfile/releases/download/v0.138.7/helmfile_linux_amd64 && chmod +x /custom-tools/helmfile
       volumeMounts:
         - mountPath: /custom-tools
           name: custom-tools
