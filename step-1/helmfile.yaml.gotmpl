@@ -3,7 +3,7 @@ repositories:
     url: https://kubernetes-sigs.github.io/metrics-server/
 templates:
   default-release: &default-release
-    namespace: kube-system
+    namespace: metrics
 environments:
   default:
     values:
@@ -11,7 +11,7 @@ environments:
         releases:
           metrics-server:
             version: 3.12.2
-            <<: *default-release
+            namespace: monitoring
 ---
 templates:
   default: &default
