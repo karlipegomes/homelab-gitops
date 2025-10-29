@@ -69,6 +69,12 @@ configs:
   cmp:
     create: true
     plugins:
+      # https://argocd-vault-plugin.readthedocs.io/en/stable/config/
+      vault-avp:
+        generate:
+          command: ["argocd-vault-plugin"]
+          args: ["generate", "./"]
+
       # https://github.com/travisghansen/argo-cd-helmfile/tree/master
       helmfile:
         init:
@@ -277,19 +283,37 @@ repoServer:
   initContainers:
     - name: download-tools
       image: alpine:3.8
-      command: [sh, -c]
       resources:
         requests:
-          cpu: 200m
+          cpu: 400m
           memory: 512Mi
         limits:
-          cpu: 200m
+          cpu: 500m
           memory: 512Mi
+      env:
+        - name: AVP_VERSION
+          value: "1.16.1"
+        - name: HELMFILE_VERSION
+          value: "0.138.7"
+      command: [sh, -c]
       args:
-        - apk add git && git clone https://github.com/travisghansen/argo-cd-helmfile.git /tmp/teste && cp /tmp/teste/src/argo-cd-helmfile.sh /custom-tools/argo-cd-helmfile.sh && chmod +x /custom-tools/argo-cd-helmfile.sh && wget -qO /custom-tools/helmfile https://github.com/roboll/helmfile/releases/download/v0.138.7/helmfile_linux_amd64 && chmod +x /custom-tools/helmfile
+        - >-
+          apk add git && 
+          git clone https://github.com/travisghansen/argo-cd-helmfile.git /tmp/teste &&
+          cp /tmp/teste/src/argo-cd-helmfile.sh /custom-tools/argo-cd-helmfile.sh &&
+          chmod +x /custom-tools/argo-cd-helmfile.sh &&
+          wget -qO /custom-tools/helmfile https://github.com/roboll/helmfile/releases/download/v${HELMFILE_VERSION}/helmfile_linux_amd64 &&
+          chmod +x /custom-tools/helmfile &&
+          wget -qO /custom-tools/argocd-vault-plugin https://github.com/argoproj-labs/argocd-vault-plugin/releases/download/v${AVP_VERSION}/argocd-vault-plugin_${AVP_VERSION}_linux_amd64 &&
+          chmod +x /custom-tools/argocd-vault-plugin 
       volumeMounts:
         - mountPath: /custom-tools
           name: custom-tools
+  env:
+    - name: AVP_TYPE
+      value: gcpsecretmanager
+    - name: GOOGLE_APPLICATION_CREDENTIALS
+      value: /app/config/cred.json
   volumeMounts:
     - mountPath: /usr/local/bin/argo-cd-helmfile.sh
       name: custom-tools
@@ -297,6 +321,12 @@ repoServer:
     - mountPath: /usr/local/bin/helmfile
       name: custom-tools
       subPath: helmfile
+    - name: custom-tools
+      mountPath: /usr/local/bin/argocd-vault-plugin
+      subPath: argocd-vault-plugin
+    - mountPath: /app/config/cred.json
+      name: gcp-creds
+      subPath: cred.json
   extraContainers:
     - name: helmfile-plugin
       image: travisghansen/argo-cd-helmfile:v0.3.13
@@ -305,17 +335,21 @@ repoServer:
         runAsNonRoot: true
         runAsUser: 999
       volumeMounts:
-        - mountPath: /var/run/argocd
-          name: var-files
-        - mountPath: /home/argocd/cmp-server/plugins
-          name: plugins
-        - mountPath: /tmp
-          name: helmfile-cmp-tmp
+        - name: var-files
+          mountPath: /var/run/argocd
+        - name: plugins
+          mountPath: /home/argocd/cmp-server/plugins
+        - name: helmfile-cmp-tmp
+          mountPath: /tmp
   volumes:
     - name: helmfile-cmp-tmp
       emptyDir: {}
     - name: custom-tools
       emptyDir: {}
+    - name: gcp-creds
+      secret:
+        secretName: gcp-argocd-cred
+  automountServiceAccountToken: true
   metrics:
     enabled: true
     serviceMonitor:
