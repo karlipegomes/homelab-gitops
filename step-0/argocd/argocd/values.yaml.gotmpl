@@ -17,10 +17,10 @@ global:
 configs:
   # General Argo CD configuration. Any values you put under `.configs.cm` are passed to argocd-cm ConfigMap.
   ## Ref: https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/argocd-cm.yaml
-  # cm:
-  #   server.rbac.log.enforce.enable: 'true'
-  #   admin.enabled: true
-  #   timeout.reconciliation: 30s
+  cm:
+    # server.rbac.log.enforce.enable: 'true'
+    admin.enabled: true
+    timeout.reconciliation: 15s
   #   resource.exclusions: |
   #     - apiGroups:
   #         - "*"

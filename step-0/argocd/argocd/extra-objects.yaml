@@ -4,8 +4,8 @@
   metadata:
     name: argocd-redis
   data:
-    REDIS_PASSWORD: ref+gcpsecrets://staffops-prd/homelab-argocd-redis
     auth: ref+gcpsecrets://staffops-prd/homelab-argocd-redis
+##########
 # - apiVersion: monitoring.coreos.com/v1
 #   kind: PrometheusRule
 #   metadata:
@@ -13,6 +13,7 @@
 #   spec:
 #     # p#rettier-ignore
 #     # {#{ exec "yq" (list "." "./prometheus.rules.yaml") | nindent 6 }}
+###########
 - apiVersion: argoproj.io/v1alpha1
   kind: AppProject
   metadata:
@@ -42,12 +43,23 @@
   metadata:
     name: bootstrap-platform
   spec:
+    goTemplate: true
+    goTemplateOptions: ['missingkey=error']
     generators:
     - git:
         repoURL: https://github.com/karlipegomes/homelab-gitops.git
         revision: HEAD
         directories:
-        - path: step-1/*
+          - path: 'step-1/*/*'
+          - path: 'step-1/**/.*'
+            exclude: true
+    syncPolicy:
+      automated:
+        prune: true
+        selfHeal: true
+      preserveResourcesOnDeletion: false
+      syncOptions:
+        - CreateNamespace=true
     template:
       metadata:
         name: '{{`{{.path.basename}}`}}'
@@ -56,10 +68,16 @@
         source:
           repoURL: https://github.com/karlipegomes/homelab-gitops.git
           targetRevision: HEAD
-          path: '{{`{{.path.path}}`}}'
+          path: './step-1/monitoring/'
+          # path: '{{`{{ regexFind "^[^/]+" .path.path }}`}}'
+          plugin:
+            name: helmfile
+            env:
+              - name: HELMFILE_GLOBAL_OPTIONS
+                value: --selector name={{`{{ .path.basename }}`}}
         destination:
           server: https://kubernetes.default.svc
-          namespace: '{{`{{path.basename}}`}}'
+          namespace: '{{`{{ index .path.segments 1 }}`}}'
         syncPolicy:
           automated:
             prune: true
