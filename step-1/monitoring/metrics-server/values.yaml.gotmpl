@@ -14,7 +14,7 @@ apiService:
 #   capabilities:
 #     drop:
 #       - ALL
-priorityClassName: system-cluster-critical
+# priorityClassName: system-cluster-critical
 replicas: 1
 podDisruptionBudget:
   enabled: false
@@ -39,5 +39,5 @@ resources:
   limits:
     cpu: 100m
     memory: 256Mi
-tls:
-  type: cert-manager
+# tls:
+#   type: cert-manager
