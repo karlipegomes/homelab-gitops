@@ -39,5 +39,14 @@ resources:
   limits:
     cpu: 100m
     memory: 256Mi
-# tls:
-#   type: cert-manager
+tls:
+  type: cert-manager
+  clusterDomain: homelab.staffops.cloud
+  certManager:
+    addInjectorAnnotations: true
+    existingIssuer:
+      enabled: true
+      kind: "ClusterIssuer"
+      name: "letsencrypt-prod"
+    duration: "90d"
+    renewBefore: "80d"
