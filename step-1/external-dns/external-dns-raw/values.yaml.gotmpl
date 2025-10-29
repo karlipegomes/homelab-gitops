@@ -3,6 +3,6 @@ resources:
     kind: Secret
     metadata:
       name: external-dns-cred
-    type: Opaque
+    # type: Opaque
     data:
       credentials.json: <path:projects/270970919647/secrets/homelab-dns-credentials#homelab-dns-credentials | base64encode>
