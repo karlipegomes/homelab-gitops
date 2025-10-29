@@ -5,6 +5,13 @@
     name: argocd-redis
   data:
     auth: ref+gcpsecrets://staffops-prd/homelab-argocd-redis
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: gcp-argocd-cred
+  type: Opaque
+  stringData: 
+    cred.json: ref+gcpsecrets://staffops-prd/homelab-argocd-cred
 ##########
 # - apiVersion: monitoring.coreos.com/v1
 #   kind: PrometheusRule
@@ -14,72 +21,3 @@
 #     # p#rettier-ignore
 #     # {#{ exec "yq" (list "." "./prometheus.rules.yaml") | nindent 6 }}
 ###########
-- apiVersion: argoproj.io/v1alpha1
-  kind: AppProject
-  metadata:
-    name: platform
-  spec:
-    description: "Base deploy Apps"
-    sourceRepos:
-      - https://github.com/karlipegomes/homelab-gitops.git
-    destinations:
-      - namespace: '*'
-        server: https://kubernetes.default.svc
-    clusterResourceWhitelist:
-      - group: '*'
-        kind: '*'
-    namespaceResourceWhitelist:
-      - group: '*'
-        kind: '*'
-    roles:
-      - name: admin
-        description: Full access to project
-        policies:
-          - p, proj:platform:admin, applications, *, platform/*, allow
-        groups:
-          - argocd-admins
-- apiVersion: argoproj.io/v1alpha1
-  kind: ApplicationSet
-  metadata:
-    name: bootstrap-platform
-  spec:
-    goTemplate: true
-    goTemplateOptions: ['missingkey=error']
-    generators:
-    - git:
-        repoURL: https://github.com/karlipegomes/homelab-gitops.git
-        revision: HEAD
-        directories:
-          - path: 'step-1/*/*'
-          - path: 'step-1/**/.*'
-            exclude: true
-    syncPolicy:
-      automated:
-        prune: true
-        selfHeal: true
-      preserveResourcesOnDeletion: false
-      syncOptions:
-        - CreateNamespace=true
-    template:
-      metadata:
-        name: '{{`{{.path.basename}}`}}'
-      spec:
-        project: platform
-        source:
-          repoURL: https://github.com/karlipegomes/homelab-gitops.git
-          targetRevision: HEAD
-          path: '{{`{{ regexReplaceAll "/[^/]+$" .path.path "/" }}`}}'
-          plugin:
-            name: helmfile
-            env:
-              - name: HELMFILE_GLOBAL_OPTIONS
-                value: --selector name={{`{{ .path.basename }}`}}
-        destination:
-          server: https://kubernetes.default.svc
-          namespace: '{{`{{ index .path.segments 1 }}`}}'
-        syncPolicy:
-          automated:
-            prune: true
-            selfHeal: true
-          syncOptions:
-            - CreateNamespace=true

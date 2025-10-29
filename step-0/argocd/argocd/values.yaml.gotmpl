@@ -95,8 +95,6 @@ configs:
       name: staffops-labs
       project: platform
       type: git
-      # username: ref+gcpsecrets://staffops-prd/homelab-github-user
-      # password: ref+gcpsecrets://staffops-prd/homelab-github-pass
 
   # Argo CD sensitive data
   # Ref: https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/#sensitive-data-and-sso-client-secrets
@@ -118,12 +116,6 @@ configs:
     server.insecure: true
   certificate:
     enable: true
-
-# credentialTemplates:
-#   https-creds:
-#     url: https://github.com/karlipegomes
-#     username: ref+gcpsecrets://staffops-prd/homelab-github-user
-#     password: ref+gcpsecrets://staffops-prd/homelab-github-pass
 
 # -- Array of extra K8s manifests to deploy
 ## Note: Supports use of custom Helm templates

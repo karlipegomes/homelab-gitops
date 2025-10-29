@@ -5,14 +5,23 @@ environments:
 ---
 templates:
   default: &default
-    kubeContext: '{{ .Values.kubeContext}}'
+    kubeContext: '{{ .Values.kubeContext }}'
     namespace: argo
     values:
       - ./{{`{{ .Release.Name }}`}}/values.yaml.gotmpl
 repositories:
+  - name: bedag
+    url: https://bedag.github.io/helm-charts
   - name: argo
     url: https://argoproj.github.io/argo-helm
 releases:
+  - chart: bedag/raw
+    name: argocd-raw
+    version: ''
+    disableValidation: true
+    needs:
+    - argocd
+    <<: *default
   - chart: argo/argo-cd
     name: argocd
     version: '9.0.5'
