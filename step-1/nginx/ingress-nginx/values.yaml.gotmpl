@@ -27,4 +27,4 @@ controller:
       enabled: false
       rules:
         # prettier-ignore
-        # {{ exec "yq" (list ".groups[0].rules" "../prometheus.rules.yaml") | nindent 10 }}
+        # {{ exec "yq" (list ".groups[0].rules" "./prometheus.rules.yaml") | nindent 10 }}

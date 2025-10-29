@@ -1,26 +1,19 @@
-repositories:
-  - name: metrics-server
-    url: https://kubernetes-sigs.github.io/metrics-server/
-templates:
-  default-release: &default-release
-    namespace: metrics-server
 environments:
   default:
     values:
       - kubeContext: minikube
-        releases:
-          metrics-server:
-            version: 3.13.0
-            <<: *default-release
 ---
+repositories:
+  - name: metrics-server
+    url: https://kubernetes-sigs.github.io/metrics-server/
 templates:
   default: &default
     kubeContext: '{{ .Values.kubeContext }}'
-    version: '{{`{{ .Values | get "releases" | get .Release.Name | get "version" }}`}}'
-    namespace: '{{`{{ .Values | get "releases" | get .Release.Name | get "namespace" }}`}}'
+    namespace: metrics-server
     values:
       - ./{{`{{ .Release.Name }}`}}/values.yaml.gotmpl
 releases:
   - chart: metrics-server/metrics-server
     name: metrics-server
+    version: 3.13.0
     <<: *default

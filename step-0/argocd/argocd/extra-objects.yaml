@@ -68,8 +68,7 @@
         source:
           repoURL: https://github.com/karlipegomes/homelab-gitops.git
           targetRevision: HEAD
-          path: './step-1/monitoring/'
-          # path: '{{`{{ regexFind "^[^/]+" .path.path }}`}}'
+          path: '{{`{{ regexReplaceAll "/[^/]+$" .path.path "/" }}`}}'
           plugin:
             name: helmfile
             env:
