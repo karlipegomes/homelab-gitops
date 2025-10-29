@@ -4,17 +4,16 @@ rbac:
   create: true
 apiService:
   create: true
-  insecureSkipTLSVerify: true
-securityContext:
-  allowPrivilegeEscalation: false
-  readOnlyRootFilesystem: true
-  runAsNonRoot: true
-  runAsUser: 1000
-  seccompProfile:
-    type: RuntimeDefault
-  capabilities:
-    drop:
-      - ALL
+# securityContext:
+#   allowPrivilegeEscalation: false
+#   readOnlyRootFilesystem: true
+#   runAsNonRoot: true
+#   runAsUser: 1000
+#   seccompProfile:
+#     type: RuntimeDefault
+#   capabilities:
+#     drop:
+#       - ALL
 priorityClassName: system-cluster-critical
 replicas: 1
 podDisruptionBudget:
