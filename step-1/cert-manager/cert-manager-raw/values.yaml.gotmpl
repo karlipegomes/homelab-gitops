@@ -1,8 +1,9 @@
 resources:
-- apiVersion: v1
-  kind: Secret
-  metadata:
-    name: cert-manager-cred
-  type: Opaque
-  data:
-    credentials.json: ref+gcpsecrets://staffops-prd/homelab-dns-credentials
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: cert-manager-cred
+    type: Opaque
+    data:
+      credentials.json: <path:projects/270970919647/secrets/homelab-dns-credentials#homelab-dns-credentials>
+      # credentials.json: ref+gcpsecrets://staffops-prd/homelab-dns-credentials
