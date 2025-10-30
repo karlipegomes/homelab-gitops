@@ -1,0 +1,21 @@
+resources:
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: gcp-sa-secret
+    type: Opaque
+    stringData:
+      secret-access-credentials: ref+gcpsecrets://staffops-prd/homelab-argo-cred
+  - apiVersion: external-secrets.io/v1
+    kind: ClusterSecretStore
+    metadata:
+      name: staffops-store
+    spec:
+      provider:
+        gcpsm:
+          auth:
+            secretRef:
+              secretAccessKeySecretRef:
+                name: gcp-sa-secret
+                key: secret-access-credentials
+          projectID: staffops-prd

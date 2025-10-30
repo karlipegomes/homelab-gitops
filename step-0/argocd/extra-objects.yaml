@@ -4,15 +4,7 @@
   metadata:
     name: argocd-redis
   data:
-    auth: ref+gcpsecrets://staffops-prd/homelab-argocd-redis
-- apiVersion: v1
-  kind: Secret
-  metadata:
-    name: gcp-argocd-cred
-  type: Opaque
-  stringData: 
-    cred.json: ref+gcpsecrets://staffops-prd/homelab-argo-cred
-      
+    auth: ref+gcpsecrets://staffops-prd/homelab-argocd-redis      
 ##########
 # - apiVersion: monitoring.coreos.com/v1
 #   kind: PrometheusRule

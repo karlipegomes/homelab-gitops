@@ -4,9 +4,14 @@ environments:
       - kubeContext: minikube
 ---
 templates:
-  default: &default
+  argo: &argo
     kubeContext: '{{ .Values.kubeContext }}'
     namespace: argo
+    values:
+      - ./{{`{{ .Release.Name }}`}}/values.yaml.gotmpl
+  sm: &secretmanager
+    kubeContext: '{{ .Values.kubeContext }}'
+    namespace: external-secrets
     values:
       - ./{{`{{ .Release.Name }}`}}/values.yaml.gotmpl
 repositories:
@@ -14,6 +19,8 @@ repositories:
     url: https://bedag.github.io/helm-charts
   - name: argo
     url: https://argoproj.github.io/argo-helm
+  - name: external-secrets
+    url: https://charts.external-secrets.io
 releases:
   - chart: bedag/raw
     name: argocd-raw
@@ -21,8 +28,16 @@ releases:
     disableValidation: true
     needs:
     - argocd
-    <<: *default
+    <<: *argo
   - chart: argo/argo-cd
     name: argocd
     version: '9.0.5'
-    <<: *default
+    <<: *argo
+  - chart: external-secrets/external-secrets
+    name: external-secrets
+    version: '0.20.4'
+    <<: *secretmanager
+  - chart: bedag/raw
+    name: external-secrets-raw
+    version: ''
+    <<: *secretmanager
