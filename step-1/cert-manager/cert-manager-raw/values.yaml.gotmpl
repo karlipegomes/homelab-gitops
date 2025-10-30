@@ -7,10 +7,9 @@ resources:
       secretStoreRef:
         kind: ClusterSecretStore
         name: staffops-store
-      refreshPolicy: OnChange
       target:
         name: cert-manager-cred
       data:
-      - secretKey: credentials.json
-        remoteRef:
-          key: homelab-dns-credentials
+        - secretKey: credentials.json
+          remoteRef:
+            key: homelab-dns-credentials
