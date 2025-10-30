@@ -4,13 +4,12 @@ resources:
     metadata:
       name: external-dns-cred
     spec:
-      externalSecretSpec:
-        secretStoreRef:
-          kind: SecretStore
-          name: gcp-dns-cred
-        target:
-          name: external-dns-cred
-        data:
+      secretStoreRef:
+        kind: ClusterSecretStore
+        name: staffops-store
+      target:
+        name: external-dns-cred
+      data:
         - secretKey: credentials.json
           remoteRef:
             key: homelab-dns-credentials
