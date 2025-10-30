@@ -7,6 +7,14 @@ image:
   pullPolicy: IfNotPresent
 
 installCRDs: true
+crds:
+  createClusterExternalSecret: true
+  createClusterSecretStore: true
+  createClusterGenerator: true
+  createClusterPushSecret: true
+  createPushSecret: true
+  conversion:
+    enabled: false
 
 # -- If true external secrets will use recommended kubernetes
 # annotations as prometheus metric labels.
@@ -16,10 +24,10 @@ extendedMetricLabels: false
 # When enabled, this adds update/patch permissions on namespaces to handle finalizers for proper
 # cleanup during namespace deletion, preventing race conditions with ExternalSecrets.
 processClusterExternalSecret: true
-processClusterPushSecret: true
+# processClusterPushSecret: true
 processClusterStore: true
-processClusterGenerator: true
-processPushSecret: true
+# processClusterGenerator: true
+# processPushSecret: true
 createOperator: true
 
 concurrent: 1

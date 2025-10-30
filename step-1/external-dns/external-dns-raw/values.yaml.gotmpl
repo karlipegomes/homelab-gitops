@@ -1,7 +1,15 @@
 resources:
-  - apiVersion: v1
-    kind: Secret
+  - apiVersion: external-secrets.io/v1alpha1
+    kind: ExternalSecret
     metadata:
       name: external-dns-cred
-    data:
-      credentials.json: ref+gcpsecrets://staffops-prd/homelab-dns-credentials
+    spec:
+      secretStoreRef:
+        kind: ClusterSecretStore
+        name: staffops-store
+      target:
+        name: external-dns-cred
+      data:
+      - secretKey: credentials.json
+        remoteRef:
+          key: homelab-dns-credentials
