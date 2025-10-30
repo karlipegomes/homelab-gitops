@@ -1,16 +1,16 @@
 resources:
   - apiVersion: external-secrets.io/v1
-    kind: ClusterExternalSecret
+    kind: ExternalSecret
     metadata:
-      name: gcp-dns-cred
+      name: cert-manager-cred
     spec:
-      externalSecretSpec:
-        secretStoreRef:
-          kind: SecretStore
-          name: gcp-dns-cred
-        target:
-          name: cert-manager-cred
-        data:
-        - secretKey: credentials.json
-          remoteRef:
-            key: homelab-dns-credentials
+      secretStoreRef:
+        kind: ClusterSecretStore
+        name: staffops-store
+      refreshPolicy: OnChange
+      target:
+        name: cert-manager-cred
+      data:
+      - secretKey: credentials.json
+        remoteRef:
+          key: homelab-dns-credentials
