@@ -39,18 +39,18 @@ resources:
   limits:
     cpu: 100m
     memory: 256Mi
-extraVolumeMounts:
-  - name: certs
-    mountPath: /certs
-extraVolumes:
-  - name: certs
-    emptyDir: {}
-tls:
-  type: cert-manager
-  clusterDomain: staffops.cloud
-  certManager:
-    addInjectorAnnotations: true
-    existingIssuer:
-      enabled: true
-      kind: "ClusterIssuer"
-      name: "letsencrypt-prod"
+# extraVolumeMounts:
+#   - name: certs
+#     mountPath: /certs
+# extraVolumes:
+#   - name: certs
+#     emptyDir: {}
+# tls:
+#   type: cert-manager
+#   clusterDomain: staffops.cloud
+#   certManager:
+#     addInjectorAnnotations: true
+#     existingIssuer:
+#       enabled: true
+#       kind: "ClusterIssuer"
+#       name: "letsencrypt-prod"
