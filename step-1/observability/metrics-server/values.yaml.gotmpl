@@ -4,16 +4,16 @@ rbac:
   create: true
 apiService:
   create: false
-# securityContext:
-#   allowPrivilegeEscalation: false
-#   readOnlyRootFilesystem: true
-#   runAsNonRoot: true
-#   runAsUser: 1000
-#   seccompProfile:
-#     type: RuntimeDefault
-#   capabilities:
-#     drop:
-#       - ALL
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+  seccompProfile:
+    type: RuntimeDefault
+  capabilities:
+    drop:
+      - ALL
 # priorityClassName: system-cluster-critical
 replicas: 1
 podDisruptionBudget:
@@ -39,6 +39,12 @@ resources:
   limits:
     cpu: 100m
     memory: 256Mi
+extraVolumeMounts:
+  - name: certs
+    mountPath: /certs
+extraVolumes:
+  - name: certs
+    emptyDir: {}
 tls:
   type: cert-manager
   clusterDomain: staffops.cloud
