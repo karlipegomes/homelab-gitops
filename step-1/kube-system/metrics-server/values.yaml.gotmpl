@@ -1,75 +1,25 @@
-# serviceAccount:
-#   create: true
-# rbac:
-#   create: true
-# apiService:
-#   create: true
-#   insecureSkipTLSVerify: true
-# # service:
-# #   annotations:
-# #     external-dns.alpha.kubernetes.io/hostname: metrics-server.staffops.cloud
-# # securityContext:
-# #   allowPrivilegeEscalation: false
-# #   readOnlyRootFilesystem: true
-# #   runAsNonRoot: true
-# #   runAsUser: 1000
-# #   seccompProfile:
-# #     type: RuntimeDefault
-# #   capabilities:
-# #     drop:
-# #       - ALL
-# # priorityClassName: system-cluster-critical
-# # hostNetwork:
-# #   enabled: true
-# replicas: 1
-# podDisruptionBudget:
-#   enabled: false
-# addonResizer:
-#   enabled: false
-# metrics:
-#   enabled: true
-# serviceMonitor:
-#   enabled: true
-# # See https://github.com/kubernetes-sigs/metrics-server#scaling
-# resources:
-#   requests:
-#     cpu: 100m
-#     memory: 256Mi
-#   limits:
-#     cpu: 100m
-#     memory: 256Mi
-# # tls:
-# #   type: cert-manager
-# #   clusterDomain: cluster.local
-# #   certManager:
-# #     addInjectorAnnotations: true
-# #     existingIssuer:
-# #       enabled: true
-# #       kind: "ClusterIssuer"
-# #       name: "letsencrypt-prod"
 serviceAccount:
   create: true
 rbac:
   create: true
 apiService:
   create: true
+#
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+  seccompProfile:
+    type: RuntimeDefault
+  capabilities:
+    drop:
+      - ALL
+#priorityClassName: system-cluster-critical
+#
 replicas: 1
-podDisruptionBudget:
-  enabled: false
-addonResizer:
-  enabled: false
-  resources:
-    requests:
-      cpu: 40m
-      memory: 25Mi
-    limits:
-      cpu: 40m
-      memory: 25Mi
-metrics:
-  enabled: true
-serviceMonitor:
-  enabled: true
-# See https://github.com/kubernetes-sigs/metrics-server#scaling
+args:
+  - --kubelet-insecure-tls
 resources:
   requests:
     cpu: 100m
@@ -77,3 +27,13 @@ resources:
   limits:
     cpu: 100m
     memory: 256Mi
+#
+metrics:
+  enabled: true
+serviceMonitor:
+  enabled: true
+#
+podDisruptionBudget:
+  enabled: false
+addonResizer:
+  enabled: false
