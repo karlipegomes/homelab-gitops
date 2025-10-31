@@ -8,8 +8,8 @@ repositories:
     url: https://kubernetes-sigs.github.io/metrics-server/
   - name: opentelemetry-operator
     url: https://open-telemetry.github.io/opentelemetry-helm-charts
-  - name: opentelemetry-operator
-    url: https://open-telemetry.github.io/opentelemetry-helm-charts5
+  - name: bedag
+    url: https://bedag.github.io/helm-charts
 templates:
   default: &default
     kubeContext: '{{ .Values.kubeContext }}'
@@ -25,7 +25,7 @@ releases:
     name: opentelemetry-operator
     version: 0.98.0
     <<: *default
-  # - chart: open-telemetry/opentelemetry-operator
-  #   name: opentelemetry-operator
-  #   version: 3.13.0
-  #   <<: *default
+  - chart: bedag/raw
+    name: opentelemetry-operator-raw
+    version: ''
+    <<: *default
