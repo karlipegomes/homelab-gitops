@@ -16,8 +16,8 @@ apiService:
 #     drop:
 #       - ALL
 # priorityClassName: system-cluster-critical
-hostNetwork::
-  enabled: false
+hostNetwork:
+  enabled: true
 replicas: 1
 podDisruptionBudget:
   enabled: false
@@ -42,3 +42,12 @@ resources:
   limits:
     cpu: 100m
     memory: 256Mi
+tls:
+  type: cert-manager
+  clusterDomain: cluster.local
+  certManager:
+    addInjectorAnnotations: true
+    existingIssuer:
+      enabled: true
+      kind: "ClusterIssuer"
+      name: "letsencrypt-prod"
