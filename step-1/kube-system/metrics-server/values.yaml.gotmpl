@@ -5,9 +5,9 @@ rbac:
 apiService:
   create: true
   insecureSkipTLSVerify: true
-service:
-  annotations:
-    external-dns.alpha.kubernetes.io/hostname: metrics-server.staffops.cloud
+# service:
+#   annotations:
+#     external-dns.alpha.kubernetes.io/hostname: metrics-server.staffops.cloud
 # securityContext:
 #   allowPrivilegeEscalation: false
 #   readOnlyRootFilesystem: true
@@ -45,12 +45,12 @@ resources:
   limits:
     cpu: 100m
     memory: 256Mi
-tls:
-  type: cert-manager
-  clusterDomain: cluster.local
-  certManager:
-    addInjectorAnnotations: true
-    existingIssuer:
-      enabled: true
-      kind: "ClusterIssuer"
-      name: "letsencrypt-prod"
+# tls:
+#   type: cert-manager
+#   clusterDomain: cluster.local
+#   certManager:
+#     addInjectorAnnotations: true
+#     existingIssuer:
+#       enabled: true
+#       kind: "ClusterIssuer"
+#       name: "letsencrypt-prod"
