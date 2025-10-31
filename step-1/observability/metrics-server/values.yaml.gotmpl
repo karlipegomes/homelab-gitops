@@ -3,7 +3,7 @@ serviceAccount:
 rbac:
   create: true
 apiService:
-  create: false
+  create: true
 securityContext:
   allowPrivilegeEscalation: false
   readOnlyRootFilesystem: true
@@ -45,12 +45,12 @@ resources:
 # extraVolumes:
 #   - name: certs
 #     emptyDir: {}
-# tls:
-#   type: cert-manager
-#   clusterDomain: staffops.cloud
-#   certManager:
-#     addInjectorAnnotations: true
-#     existingIssuer:
-#       enabled: true
-#       kind: "ClusterIssuer"
-#       name: "letsencrypt-prod"
+tls:
+  type: cert-manager
+  clusterDomain: staffops.cloud
+  certManager:
+    addInjectorAnnotations: true
+    existingIssuer:
+      enabled: true
+      kind: "ClusterIssuer"
+      name: "letsencrypt-prod"
