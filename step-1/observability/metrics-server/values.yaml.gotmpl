@@ -3,7 +3,18 @@ serviceAccount:
 rbac:
   create: true
 apiService:
-  create: true
+  create: false
+# securityContext:
+#   allowPrivilegeEscalation: false
+#   readOnlyRootFilesystem: true
+#   runAsNonRoot: true
+#   runAsUser: 1000
+#   seccompProfile:
+#     type: RuntimeDefault
+#   capabilities:
+#     drop:
+#       - ALL
+# priorityClassName: system-cluster-critical
 replicas: 1
 podDisruptionBudget:
   enabled: false
@@ -17,9 +28,9 @@ addonResizer:
       cpu: 40m
       memory: 25Mi
 metrics:
-  enabled: false
+  enabled: true
 serviceMonitor:
-  enabled: false
+  enabled: true
 # See https://github.com/kubernetes-sigs/metrics-server#scaling
 resources:
   requests:
@@ -28,3 +39,14 @@ resources:
   limits:
     cpu: 100m
     memory: 256Mi
+tls:
+  type: cert-manager
+  clusterDomain: homelab.staffops.cloud
+  certManager:
+    addInjectorAnnotations: true
+    existingIssuer:
+      enabled: true
+      kind: "ClusterIssuer"
+      name: "letsencrypt-prod"
+    duration: "90d"
+    renewBefore: "80d"
