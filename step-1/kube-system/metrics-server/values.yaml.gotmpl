@@ -5,6 +5,9 @@ rbac:
 apiService:
   create: true
   insecureSkipTLSVerify: true
+service:
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: metrics-server.staffops.cloud
 # securityContext:
 #   allowPrivilegeEscalation: false
 #   readOnlyRootFilesystem: true
