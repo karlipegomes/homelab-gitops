@@ -1,0 +1,130 @@
+replicaCount: 1
+revisionHistoryLimit: 2
+## Kubernetes cluster domain suffix
+clusterDomain: lab01.staffops.cloud
+pdb:
+  create: false
+  minAvailable: 1
+  maxUnavailable: ""
+manager:
+  image:
+    repository: ghcr.io/open-telemetry/opentelemetry-operator/opentelemetry-operator
+    tag: ""
+    imagePullPolicy: IfNotPresent
+  collectorImage:
+    repository: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-k8s
+    tag: 0.137.0
+  opampBridgeImage:
+    repository: ""
+    tag: ""
+  targetAllocatorImage:
+    repository: ""
+    tag: ""
+  ignoreMissingCollectorCRDs: false
+  ports:
+    metricsPort: 8080
+    webhookPort: 9443
+    healthzPort: 8081
+  resources: {}
+  # resources:
+  #   limits:
+  #     cpu: 100m
+  #     memory: 128Mi
+  #     ephemeral-storage: 50Mi
+  #   requests:
+  #     cpu: 100m
+  #     memory: 64Mi
+  #     ephemeral-storage: 50Mi
+  env:
+    ENABLE_WEBHOOKS: "true"
+  extraEnvs: []
+  # - name: GOMEMLIMIT
+  #   valueFrom:
+  #     resourceFieldRef:
+  #       containerName: manager
+  #       resource: limits.memory
+  serviceAccount:
+    create: true
+  serviceMonitor:
+    enabled: true
+    metricsEndpoints:
+      - port: metrics
+  prometheusRule:
+    enabled: false
+    groups: []
+    defaultRules:
+      enabled: false
+  # Whether the operator should create RBAC permissions for collectors. See README.md for more information.
+  createRbacPermissions: true
+  leaderElection:
+    enabled: true
+  verticalPodAutoscaler:
+    enabled: false
+  # Enable manager pod automatically rolling
+  rolling: false
+
+  ## Container specific securityContext
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+kubeRBACProxy:
+  enabled: false
+  image:
+    repository: quay.io/brancz/kube-rbac-proxy
+    tag: v0.19.1
+  ports:
+    proxyPort: 8443
+  resources: {}
+  # resources:
+  #   limits:
+  #     cpu: 500m
+  #     memory: 128Mi
+  #   requests:
+  #     cpu: 5m
+  #     memory: 64Mi
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+admissionWebhooks:
+  create: true
+  servicePort: 443
+  failurePolicy: Fail
+  secretName: ""
+  pods:
+    failurePolicy: Ignore
+  certManager:
+    enabled: true
+    issuerRef:
+      kind: ClusterIssuer
+      name: letsencrypt-prod
+    ## Annotations for the cert and issuer if cert-manager is enabled.
+    certificateAnnotations: {}
+    issuerAnnotations: {}
+    duration: "720h"
+    renewBefore: "48h"
+  ## Secret annotations
+  secretAnnotations:
+    "helm.sh/hook": "pre-install,pre-upgrade"
+    "helm.sh/hook-delete-policy": "before-hook-creation"
+crds:
+  create: true
+role:
+  create: true
+clusterRole:
+  create: true
+securityContext:
+  runAsGroup: 65532
+  runAsNonRoot: true
+  runAsUser: 65532
+  fsGroup: 65532
