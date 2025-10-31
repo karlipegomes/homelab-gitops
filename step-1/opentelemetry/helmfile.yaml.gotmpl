@@ -1,0 +1,25 @@
+environments:
+  default:
+    values:
+      - kubeContext: minikube
+---
+repositories:
+  - name: opentelemetry-operator
+    url: https://open-telemetry.github.io/opentelemetry-helm-charts
+  - name: bedag
+    url: https://bedag.github.io/helm-charts
+templates:
+  default: &default
+    kubeContext: '{{ .Values.kubeContext }}'
+    namespace: observability
+    values:
+      - ./{{`{{ .Release.Name }}`}}/values.yaml.gotmpl
+releases:
+  - chart: open-telemetry/opentelemetry-operator
+    name: opentelemetry-operator
+    version: 0.98.0
+    <<: *default
+  - chart: bedag/raw
+    name: opentelemetry-operator-raw
+    version: ''
+    <<: *default
