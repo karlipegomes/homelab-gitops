@@ -11,7 +11,7 @@ repositories:
 templates:
   default: &default
     kubeContext: '{{ .Values.kubeContext }}'
-    namespace: observability
+    namespace: opentelemetry
     values:
       - ./{{`{{ .Release.Name }}`}}/values.yaml.gotmpl
 releases:
