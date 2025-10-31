@@ -4,7 +4,7 @@ rbac:
   create: true
 apiService:
   create: true
-  insecureSkipTLSVerify: true
+  # insecureSkipTLSVerify: true
 securityContext:
   allowPrivilegeEscalation: false
   readOnlyRootFilesystem: true
@@ -48,7 +48,7 @@ resources:
 #     emptyDir: {}
 tls:
   type: cert-manager
-  clusterDomain: staffops.cloud
+  # clusterDomain: staffops.cloud
   certManager:
     addInjectorAnnotations: true
     existingIssuer:
