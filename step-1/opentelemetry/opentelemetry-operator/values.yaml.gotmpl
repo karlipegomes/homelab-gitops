@@ -1,7 +1,7 @@
 replicaCount: 1
 revisionHistoryLimit: 2
 ## Kubernetes cluster domain suffix
-clusterDomain: staffops.cloud
+# clusterDomain: staffops.cloud
 pdb:
   create: false
   minAvailable: 1
@@ -101,7 +101,6 @@ admissionWebhooks:
   servicePort: 443
   failurePolicy: Fail
   secretName: ""
-  # namePrefix: "staffops.cloud"
   pods:
     failurePolicy: Ignore
   certManager:
@@ -109,10 +108,6 @@ admissionWebhooks:
     issuerRef:
       kind: ClusterIssuer
       name: selfsigned-issuer
-  autoGenerateCert:
-    enabled: false
-    recreate: true
-    certPeriodDays: 365
   secretAnnotations:
     "helm.sh/hook": "pre-install,pre-upgrade"
     "helm.sh/hook-delete-policy": "before-hook-creation"
