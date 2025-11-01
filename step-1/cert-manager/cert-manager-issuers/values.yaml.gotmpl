@@ -26,3 +26,10 @@ clusterIssuers:
         privateKeySecretRef:
           name: letsencrypt-staging
         solvers: *solvers
+  - name: selfsigned-ca-cluster
+    spec:
+      selfSigned: {}
+  - name: selfsigned-issuer
+    spec:
+      ca:
+        secretName: selfsigned-secret
