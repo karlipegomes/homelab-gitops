@@ -27,12 +27,6 @@ _internal_defaults_do_not_set:
   global:
     defaultPodDisruptionBudget:
       enabled: true
-    defaultResources:
-      requests:
-        cpu: 10m
-    # Enabled by default in master for maximising testing.
-    istiod:
-      enableAnalysis: false
 
     logAsJson: true
     logging:
@@ -49,9 +43,5 @@ _internal_defaults_do_not_set:
         limits:
           cpu: "2"
           memory: 1Gi
-          
-  # base:
-  #   # For istioctl usage to disable istio config crds in base
-  #   enableIstioConfigCRDs: true
   pdb:
     minAvailable: 1
