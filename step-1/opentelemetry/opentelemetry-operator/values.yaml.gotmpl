@@ -105,12 +105,12 @@ admissionWebhooks:
   pods:
     failurePolicy: Ignore
   certManager:
-    enabled: false
+    enabled: true
     issuerRef:
       kind: ClusterIssuer
       name: letsencrypt-prod
   autoGenerateCert:
-    enabled: true
+    enabled: false
     recreate: true
     certPeriodDays: 365
   secretAnnotations:
