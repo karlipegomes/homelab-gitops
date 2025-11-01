@@ -16,6 +16,8 @@ templates:
     namespace: istio-system
     values:
       - ./{{`{{ .Release.Name }}`}}/values.yaml.gotmpl
+commonLabels:
+  istio.io/dataplane-mode: ambient
 releases:
   - chart: istio/base
     name: istio-base
