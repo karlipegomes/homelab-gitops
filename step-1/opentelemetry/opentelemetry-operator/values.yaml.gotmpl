@@ -104,16 +104,14 @@ admissionWebhooks:
   pods:
     failurePolicy: Ignore
   certManager:
-    enabled: true
+    enabled: false
     issuerRef:
       kind: ClusterIssuer
       name: letsencrypt-prod
-    ## Annotations for the cert and issuer if cert-manager is enabled.
-    certificateAnnotations: {}
-    issuerAnnotations: {}
-    duration: "720h"
-    renewBefore: "48h"
-  ## Secret annotations
+  autoGenerateCert:
+    enabled: true
+    recreate: true
+    certPeriodDays: 365
   secretAnnotations:
     "helm.sh/hook": "pre-install,pre-upgrade"
     "helm.sh/hook-delete-policy": "before-hook-creation"
