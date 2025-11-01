@@ -2,6 +2,8 @@ environments:
   default:
     values:
       - kubeContext: minikube
+        version:
+          argo_common: 1.27.3
 ---
 repositories:
   - name: istio
@@ -17,21 +19,21 @@ templates:
 releases:
   - chart: istio/base
     name: istio-base
-    version: 1.27.3
+    version: '{{`{{ .Values.version.argo_common }}`}}'
     <<: *default
   - chart: bedag/raw
     name: istio-raw
     version: ''
     <<: *default
   - chart: istio/istiod
-    name: istiod
-    version: 1.27.3
+    name: istio-istiod
+    version: '{{`{{ .Values.version.argo_common }}`}}'
     <<: *default
   - chart: istio/cni
-    name: istiod-cni
-    version: 1.27.3
+    name: istio-cni
+    version: '{{`{{ .Values.version.argo_common }}`}}'
     <<: *default
   - chart: istio/ztunnel
     name: istio-ztunnel
-    version: 1.27.3
+    version: '{{`{{ .Values.version.argo_common }}`}}'
     <<: *default
