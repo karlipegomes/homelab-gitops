@@ -101,14 +101,14 @@ admissionWebhooks:
   servicePort: 443
   failurePolicy: Fail
   secretName: ""
-  namePrefix: "staffops.cloud"
+  # namePrefix: "staffops.cloud"
   pods:
     failurePolicy: Ignore
   certManager:
     enabled: true
     issuerRef:
       kind: ClusterIssuer
-      name: letsencrypt-prod
+      name: selfsigned-issuer
   autoGenerateCert:
     enabled: false
     recreate: true
