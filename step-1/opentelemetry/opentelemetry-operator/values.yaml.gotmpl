@@ -100,7 +100,8 @@ admissionWebhooks:
   create: true
   servicePort: 443
   failurePolicy: Fail
-  # secretName: ""
+  secretName: ""
+  namePrefix: "staffops.cloud"
   pods:
     failurePolicy: Ignore
   certManager:
