@@ -1,7 +1,7 @@
 replicaCount: 1
 revisionHistoryLimit: 2
 ## Kubernetes cluster domain suffix
-clusterDomain: lab01.staffops.cloud
+clusterDomain: staffops.cloud
 pdb:
   create: false
   minAvailable: 1
@@ -100,7 +100,7 @@ admissionWebhooks:
   create: true
   servicePort: 443
   failurePolicy: Fail
-  secretName: ""
+  # secretName: ""
   pods:
     failurePolicy: Ignore
   certManager:
