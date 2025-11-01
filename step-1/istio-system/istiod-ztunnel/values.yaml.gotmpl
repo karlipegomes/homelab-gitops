@@ -1,0 +1,15 @@
+_internal_defaults_do_not_set:
+
+  logLevel: info
+  logAsJson: true
+
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0

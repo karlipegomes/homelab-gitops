@@ -1,0 +1,35 @@
+_internal_defaults_do_not_set:
+  # Same as `global.logging.level`, but will override it if set
+  logging:
+    level: info""
+  excludeNamespaces:
+    - kube-system
+  repair:
+    enabled: true
+
+  ambient:
+    enabled: true
+    # If enabled, and ambient is enabled, the CNI agent will reconcile incompatible iptables rules and chains at startup.
+    # This will eventually be enabled by default
+    reconcileIptablesOnStartup: false
+    # If enabled, and ambient is enabled, the CNI agent will always share the network namespace of the host node it is running on
+    shareHostNetworkNamespace: false
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+
+  global:
+    logAsJson: true
+    defaultResources:
+      requests:
+        cpu: 100m
+        memory: 100Mi
+
+    # In order to use native nftable rules instead of iptable rules, set this flag to true.
+    nativeNftables: false
