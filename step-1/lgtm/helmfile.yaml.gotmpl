@@ -25,10 +25,10 @@ releases:
     name: prometheus
     version: 25.20.1
     <<: *default
-  # - chart: grafana/mimir-distributed
-  #   name: mimir
-  #   version: 6.0.0
-  #   <<: *default
+  - chart: grafana/mimir-distributed
+    name: mimir
+    version: 6.0.0
+    <<: *default
   - chart: grafana/tempo-distributed
     name: tempo
     version: 1.52.6
