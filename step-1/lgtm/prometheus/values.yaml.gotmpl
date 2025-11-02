@@ -1,0 +1,59 @@
+rbac:
+  create: true
+podSecurityPolicy:
+  enabled: false
+serviceAccounts:
+  server:
+    create: true
+#
+server:
+  # baseURL: ""
+  global:
+    scrape_interval: 1m
+    scrape_timeout: 10s
+    evaluation_interval: 1m
+
+  ## https://prometheus.io/docs/prometheus/latest/configuration/configuration/#remote_write
+  ##
+  remoteWrite: []
+  ## https://prometheus.io/docs/prometheus/latest/configuration/configuration/#remote_read
+  ##
+  remoteRead: []
+  ## https://prometheus.io/docs/prometheus/latest/configuration/configuration/#tsdb
+  ##
+  tsdb: {}
+    # out_of_order_time_window: 0s
+
+  ingress:
+    enabled: false
+  persistentVolume:
+    enabled: true
+    accessModes:
+      - ReadWriteOnce
+    size: 20Gi
+    storageClass: "standard"
+  replicaCount: 1
+#
+## Prometheus server ConfigMap entries for scrape_config_files
+## (allows scrape configs defined in additional files)
+##
+scrapeConfigFiles: []
+#
+alertmanager:
+  enabled: false
+  persistence:
+    size: 2Gi
+  podSecurityContext:
+    runAsUser: 65534
+    runAsNonRoot: true
+    runAsGroup: 65534
+    fsGroup: 65534
+kube-state-metrics:
+  enabled: false
+prometheus-node-exporter:
+  enabled: false
+prometheus-pushgateway:
+  enabled: true
+  # Optional service annotations
+  serviceAnnotations:
+    prometheus.io/probe: pushgateway

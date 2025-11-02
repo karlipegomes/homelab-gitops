@@ -1,0 +1,313 @@
+rbac:
+  create: true
+serviceAccount:
+  create: true
+#
+replicas: 1
+autoscaling:
+  enabled: false
+deploymentStrategy:
+  type: RollingUpdate
+revisionHistoryLimit: 2
+#
+readinessProbe:
+  httpGet:
+    path: /api/health
+    port: 3000
+livenessProbe:
+  httpGet:
+    path: /api/health
+    port: 3000
+  initialDelaySeconds: 60
+  timeoutSeconds: 30
+  failureThreshold: 10
+#
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 472
+  runAsGroup: 472
+  fsGroup: 472
+#
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  seccompProfile:
+    type: RuntimeDefault
+#
+createConfigmap: true
+#
+downloadDashboards:
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+      - ALL
+    seccompProfile:
+      type: RuntimeDefault
+  envValueFrom: {}
+  #  ENV_NAME:
+  #    configMapKeyRef:
+  #      name: configmap-name
+  #      key: value_key
+#
+service:
+  enabled: true
+  type: ClusterIP
+serviceMonitor:
+  enabled: true
+  path: /metrics
+ingress:
+  enabled: true
+  ingressClassName: nginx-external
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  pathType: Prefix
+  hosts:
+    - grafana.staffops.cloud
+  tls:
+    - secretName: grafana-staffops-cloud-tls
+      hosts:
+        - grafana.staffops.cloud
+# [[ref]](https://gateway-api.sigs.k8s.io/references/spec/#gateway.networking.k8s.io%2fv1alpha2)
+route:
+  main:
+    # -- Enables or disables the route
+    enabled: false
+    # -- Set the route apiVersion, e.g. gateway.networking.k8s.io/v1 or gateway.networking.k8s.io/v1alpha2
+    apiVersion: gateway.networking.k8s.io/v1
+    # -- Set the route kind
+    # Valid options are GRPCRoute, HTTPRoute, TCPRoute, TLSRoute, UDPRoute
+    kind: HTTPRoute
+    annotations: {}
+    labels: {}
+    hostnames: []
+    # - my-filter.example.com
+    parentRefs: []
+    # - name: acme-gw
+    matches:
+      - path:
+          type: PathPrefix
+          value: /
+#
+persistence:
+  type: pvc
+  enabled: true
+  storageClassName: standard
+  ## (Optional) Use this to bind the claim to an existing PersistentVolume (PV) by name.
+  # volumeName: ""
+  accessModes:
+    - ReadWriteOnce
+  size: 10Gi
+  # annotations: {}
+  finalizers:
+    - kubernetes.io/pvc-protection
+#
+admin:
+  existingSecret: "grafana-admin"
+  userKey: admin-user
+  passwordKey: admin-password
+#
+plugins: []
+  # - digrich-bubblechart-panel
+  # - grafana-clock-panel
+  ## You can also use other plugin download URL, as long as they are valid zip files,
+  ## and specify the name of the plugin after the semicolon. Like this:
+  # - https://grafana.com/api/plugins/marcusolsson-json-datasource/versions/1.3.2/download;marcusolsson-json-datasource
+
+## Configure grafana datasources
+## ref: http://docs.grafana.org/administration/provisioning/#datasources
+##
+datasources: {}
+  # datasources.yaml:
+  #   apiVersion: 1
+  #   datasources:
+  #   - name: Prometheus
+  #     type: prometheus
+  #     url: http://prometheus-prometheus-server
+  #     isDefault: true
+  #   - name: Loki
+  #     type: loki
+  #     uid: loki
+  #     access: proxy
+  #     url: http://loki-gateway.lgtm:80
+  #     jsonData:
+  #       timeout: 60
+  #       maxLines: 1000
+  #     editable: true
+    # - name: Mimir
+    #   type: prometheus
+    #   uid: mimir
+    #   access: proxy
+    #   url: http://mimir-gateway.lgtm:80/prometheus
+    #   editable: true
+    # - name: Tempo
+    #   type: tempo
+    #   uid: tempo
+    #   access: proxy
+    #   url: http://tempo-gateway.lgtm:80
+    #   editable: true
+    #   jsonData:
+    #     tracesToLogsV2:
+    #       datasourceUid: loki
+    #       filterByTraceID: false
+    #       filterBySpanID: false
+    #     tracesToMetrics:
+    #       datasourceUid: mimir
+    #     serviceMap:
+    #       datasourceUid: mimir
+    #     nodeGraph:
+    #       enabled: true
+    #     search:
+    #       hide: false
+    #     traceQuery:
+    #       timeShiftEnabled: true
+#
+## Configure grafana alerting (can be templated)
+## ref: https://docs.grafana.com/alerting/set-up/provision-alerting-resources/file-provisioning/
+##
+alerting: {}
+  # policies.yaml:
+  #   apiVersion: 1
+  #   policies:
+  #     - orgId: 1
+  #       receiver: first_uid
+  #
+  # rules.yaml:
+  #   apiVersion: 1
+  #   groups:
+  #     - orgId: 1
+  #       name: '{{ .Chart.Name }}_my_rule_group'
+  #       folder: my_first_folder
+  #       interval: 60s
+  #       rules:
+  #         - uid: my_id_1
+  #           title: my_first_rule
+  #           condition: A
+  #           data:
+  #             - refId: A
+  #               datasourceUid: '-100'
+  #               model:
+  #                 conditions:
+  #                   - evaluator:
+  #                       params:
+  #                         - 3
+  #                       type: gt
+  #                     operator:
+  #                       type: and
+  #                     query:
+  #                       params:
+  #                         - A
+  #                     reducer:
+  #                       type: last
+  #                     type: query
+  #                 datasource:
+  #                   type: __expr__
+  #                   uid: '-100'
+  #                 expression: 1==0
+  #                 intervalMs: 1000
+  #                 maxDataPoints: 43200
+  #                 refId: A
+  #                 type: math
+  #           dashboardUid: my_dashboard
+  #           panelId: 123
+  #           noDataState: Alerting
+  #           for: 60s
+  #           annotations:
+  #             some_key: some_value
+  #           labels:
+  #             team: sre_team_1
+  #
+  # contactpoints.yaml:
+  #   secret:
+  #     apiVersion: 1
+  #     contactPoints:
+  #       - orgId: 1
+  #         name: cp_1
+  #         receivers:
+  #           - uid: first_uid
+  #             type: pagerduty
+  #             settings:
+  #               integrationKey: XXX
+  #               severity: critical
+  #               class: ping failure
+  #               component: Grafana
+  #               group: app-stack
+  #               summary: |
+  #                 {{ `{{ include "default.message" . }}` }}
+  #
+  # templates.yaml:
+  #   apiVersion: 1
+  #   templates:
+  #     - orgId: 1
+  #       name: my_first_template
+  #       template: |
+  #         {{ `
+  #         {{ define "my_first_template" }}
+  #         Custom notification message
+  #         {{ end }}
+  #         ` }}
+  #
+  # mutetimes.yaml
+  #   apiVersion: 1
+  #   muteTimes:
+  #     - orgId: 1
+  #       name: mti_1
+  #       # refer to https://prometheus.io/docs/alerting/latest/configuration/#time_interval-0
+  #       time_intervals: {}
+
+## Configure grafana dashboard providers
+## ref: http://docs.grafana.org/administration/provisioning/#dashboards
+##
+## `path` must be /var/lib/grafana/dashboards/<provider_name>
+##
+dashboardProviders: {}
+#  dashboardproviders.yaml:
+#    apiVersion: 1
+#    providers:
+#    - name: 'default'
+#      orgId: 1
+#      folder: ''
+#      type: file
+#      disableDeletion: false
+#      editable: true
+#      options:
+#        path: /var/lib/grafana/dashboards/default
+dashboards: {}
+  # default:
+  #   custom-dashboard:
+  #     file: dashboards/custom-dashboard.json
+  #   local-dashboard:
+  #     url: https://example.com/repository/test.json
+  #     curlOptions: "-sLf"
+  #     token: ''
+
+## Reference to external ConfigMap per provider. Use provider name as key and ConfigMap name as value.
+## A provider dashboards must be defined either by external ConfigMaps or in values.yaml, not in both.
+## ConfigMap data example:
+##
+## data:
+##   example-dashboard.json: |
+##     RAW_JSON
+##
+dashboardsConfigMaps: {}
+#  default: ""
+#
+grafana.ini:
+  paths:
+    data: /var/lib/grafana/
+    logs: /var/log/grafana
+    plugins: /var/lib/grafana/plugins
+    provisioning: /etc/grafana/provisioning
+  analytics:
+    check_for_updates: true
+  log:
+    mode: console
+  grafana_net:
+    url: https://grafana.net
+  server:
+    domain: "{{ if (and .Values.ingress.enabled .Values.ingress.hosts) }}{{ tpl (.Values.ingress.hosts | first) . }}{{ else }}''{{ end }}"
+#
+ldap:
+  enabled: false

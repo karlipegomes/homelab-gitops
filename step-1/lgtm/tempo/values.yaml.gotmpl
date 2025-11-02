@@ -1,0 +1,171 @@
+configStorageType: Secret
+reportingEnabled: true
+serviceAccount:
+  create: true
+ingester:
+  replicas: 4
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 250m
+      memory: 512Mi
+  persistence:
+    enabled: true
+    size: 50Gi
+  config:
+    replication_factor: 2
+  zoneAwareReplication:
+    enabled: false
+metricsGenerator:
+  enabled: false
+distributor:
+  replicas: 1
+  autoscaling:
+    enabled: false
+  resources:
+    requests:
+      cpu: 600m
+      memory: 2048Mi
+      # cpu: 400m
+      # memory: 1024Mi
+    limits:
+      cpu: 600m
+      memory: 2048Mi
+  config:
+    log_received_spans:
+      enabled: true
+      include_all_attributes: true
+      filter_by_status_error: true
+    log_discarded_spans:
+      enabled: true
+      include_all_attributes: true
+      filter_by_status_error: true
+compactor:
+  replicas: 1
+  autoscaling:
+    enabled: false
+    hpa:
+      enabled: false
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 250m
+      memory: 512Mi
+  maxUnavailable: 1
+  config:
+    compaction:
+      block_retention: 720h
+      v2_in_buffer_bytes: 5_242_880
+      v2_out_buffer_bytes: 20_971_520
+      max_compaction_objects: 6_000_000
+      max_block_bytes: 107_374_182_400
+      v2_prefetch_traces_count: 1_000
+      compaction_cycle: 30s
+querier:
+  replicas: 1
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: 100m
+      memory: 512Mi
+  maxUnavailable: 1
+queryFrontend:
+  query:
+    enabled: false
+  replicas: 1
+  config:
+    max_outstanding_per_tenant: 2_000
+    max_retries: 2
+    search:
+      concurrent_jobs: 1_000
+      target_bytes_per_job: 104_857_600
+    trace_by_id:
+      query_shards: 50
+    metrics:
+      concurrent_jobs: 1_000
+      target_bytes_per_job: 104_857_600
+      max_duration: 3h
+      query_backend_after: 30m
+      interval: 5m
+      duration_slo: 0s
+      throughput_bytes_slo: 0
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+  ingress:
+    enabled: false
+  maxUnavailable: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 2048Mi
+multitenancyEnabled: false
+rollout_operator:
+  enabled: false
+traces:
+  otlp:
+    http:
+      enabled: true
+server:
+  logLevel: info
+  logFormat: json
+storage:
+  trace:
+    backend: s3
+    s3:
+      bucket: '{{ .Values.tempo_bucket }}'
+      endpoint: s3.amazonaws.com
+memcached:
+  enabled: true
+  host: memcached
+  replicas: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+  maxUnavailable: 1
+metaMonitoring:
+  serviceMonitor:
+    enabled: true
+  grafanaAgent:
+    enabled: false
+    installOperator: false
+prometheusRule:
+  enabled: false
+minio:
+  enabled: false
+gateway:
+  enabled: true
+  # replicas: 1
+  autoscaling:
+    enabled: false
+  verboseLogging: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 100m
+      memory: 256Mi
+  maxUnavailable: 0
+  ingress:
+    enabled: false
+  basicAuth:
+    enabled: false
+enterprise:
+  enabled: false
