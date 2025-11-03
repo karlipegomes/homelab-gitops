@@ -1,0 +1,19 @@
+resources:
+  - apiVersion: external-secrets.io/v1
+    kind: ExternalSecret
+    metadata:
+      name: minio-admin
+    spec:
+      secretStoreRef:
+        kind: ClusterSecretStore
+        name: staffops-store
+      target:
+        name: minio-admin
+      data:
+        - secretKey: rootUser
+          remoteRef:
+            key: homelab-grafana-user
+        - secretKey: rootPassword
+          remoteRef:
+            key: homelab-grafana-pass
+            

@@ -1,0 +1,75 @@
+mode: standalone
+existingSecret: "minio-admin"
+#
+drivesPerNode: 1
+replicas: 1
+pools: 1
+#
+persistence:
+  enabled: true
+  storageClass: "standard"
+  accessMode: ReadWriteOnce
+  size: 50Gi
+#
+ingress:
+  enabled: true
+  ingressClassName: nginx-external
+  annotations: 
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  path: /
+  hosts:
+    - minio.staffops.cloud
+  tls:
+    - secretName: minio-staffops-cloud-tls
+      hosts:
+        - minio.staffops.cloud
+consoleIngress:
+  enabled: true
+  ingressClassName: nginx-external
+  annotations: 
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  path: /
+  hosts:
+    - console-minio.staffops.cloud
+  tls:
+    - secretName: console-minio-staffops-cloud-tls
+      hosts:
+        - console-minio.staffops.cloud
+#
+resources:
+  limit:
+    memory: 500Mi
+#
+users: []
+  # - accessKey: console
+  #   secretKey: console123
+  #   policy: consoleAdmin
+
+## OpenID Identity Management
+## The following section documents environment variables for enabling external identity management using an OpenID Connect (OIDC)-compatible provider.
+## See https://min.io/docs/minio/linux/operations/external-iam/configure-openid-external-identity-management.html for a tutorial on using these variables.
+oidc:
+  enabled: false
+  configUrl: "https://identity-provider-url/.well-known/openid-configuration"
+  clientId: "minio"
+  clientSecret: ""
+  # Provide existing client secret from the Kubernetes Secret resource, existing secret will have priority over `clientId` and/or `clientSecret``
+  existingClientSecretName: ""
+  existingClientIdKey: ""
+  existingClientSecretKey: ""
+  claimName: "policy"
+  scopes: "openid,profile,email"
+  redirectUri: "https://console-endpoint-url/oauth_callback"
+  # Can leave empty
+  claimPrefix: ""
+  comment: ""
+  displayName: ""
+
+podDisruptionBudget:
+  enabled: false
+  maxUnavailable: 1
+serviceAccount:
+  create: true
+metrics:
+  serviceMonitor:
+    enabled: true

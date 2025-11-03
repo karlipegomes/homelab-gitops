@@ -1,0 +1,25 @@
+environments:
+  default:
+    values:
+      - kubeContext: minikube
+---
+repositories:
+  - name: minio
+    url: https://charts.min.io/
+  - name: bedag
+    url: https://bedag.github.io/helm-charts
+templates:
+  default: &default
+    kubeContext: '{{ .Values.kubeContext }}'
+    namespace: opentelemetry
+    values:
+      - ./{{`{{ .Release.Name }}`}}/values.yaml.gotmpl
+releases:
+  - chart: minio/minio
+    name: minio
+    version: 5.4.0
+    <<: *default
+  - chart: bedag/raw
+    name: minio-raw
+    version: ''
+    <<: *default
