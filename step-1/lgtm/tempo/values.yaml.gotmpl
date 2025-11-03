@@ -123,10 +123,7 @@ server:
   logFormat: json
 storage:
   trace:
-    backend: s3
-    s3:
-      bucket: '{{ .Values.tempo_bucket }}'
-      endpoint: s3.amazonaws.com
+    backend: local
 memcached:
   enabled: true
   host: memcached
